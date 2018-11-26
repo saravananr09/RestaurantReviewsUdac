@@ -44,11 +44,24 @@ self.addEventListener('activate', function(event) {
 	);
 })
 
+// self.addEventListener('fetch', function(event) {
+// 	event.respondWith(
+// 		caches.match(event.request, {ignoreSearch: true})
+// 		.then(function(response) {
+// 			return response || fetch(event.request);
+// 		})
+// 	);
+// });
 self.addEventListener('fetch', function(event) {
 	event.respondWith(
-		caches.match(event.request, {ignoreSearch: true})
-		.then(function(response) {
-			return response || fetch(event.request);
-		})
+	  caches.open('staticCacheName').then(function(cache) {
+		return cache.match(event.request).then(function (response) {
+		  return response || fetch(event.request).then(function(response) {
+			cache.put(event.request, response.clone());
+			return response;
+		  });
+		});
+	  })
 	);
-});
+  });
+
